@@ -3,7 +3,7 @@ name: Deploy to Release Branch
 on:
   push:
     branches:
-      - development
+      - develop
 
 jobs:
   build-and-deploy:

@@ -1,4 +1,4 @@
-name: Deploy to Release Branch
+name: Deploy to Version-Specific Release Branch
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout reposito'ry
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -21,17 +21,39 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Extract version from package.json
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION"
+
+      - name: Run semantic-release (optional)
+        if: steps.version.outputs.VERSION
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release
+
       - name: Build project
         run: npm run build
 
-      - name: Deploy to release branch
+      - name: Create or update version-specific release branch
         env:
           TOKEN: ${{ secrets.PAT }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git checkout -b release || git checkout release
+          RELEASE_BRANCH="release/v$VERSION"
+          git checkout -b $RELEASE_BRANCH || git checkout $RELEASE_BRANCH
           cp -r dist/* .
           git add .
-          git commit -m "Deploy build from development branch"
-          git push https://x-access-token:${TOKEN}@github.com/rubenszinho/gazillion-beers.git release --force
+          git commit -m "Deploy version $VERSION to $RELEASE_BRANCH"
+          git push https://x-access-token:${TOKEN}@github.com/rubenszinho/gazillion-beers.git $RELEASE_BRANCH --force
+
+      - name: Tag the release
+        env:
+          TOKEN: ${{ secrets.PAT }}
+        run: |
+          git tag -a "v$VERSION" -m "Release version $VERSION"
+          git push https://x-access-token:${TOKEN}@github.com/rubenszinho/gazillion-beers.git --tags

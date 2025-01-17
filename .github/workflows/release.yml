@@ -1,0 +1,58 @@
+name: Deploy to Version-Specific Release Branch
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Semantic Release
+        id: semantic
+        env:
+          GH_TOKEN: ${{ secrets.PAT }}
+        run: |
+          npx semantic-release --branches=develop --dry-run > semantic-output.log
+
+          VERSION=$(grep -Po 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+' semantic-output.log)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Semantic Release determined version: $VERSION"
+
+      - name: Build project
+        run: npm run build
+
+      - name: Push to Version-Specific Release Branch
+        env:
+          TOKEN: ${{ secrets.PAT }}
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          RELEASE_BRANCH="release/v$VERSION"
+
+          git checkout -b $RELEASE_BRANCH || git checkout $RELEASE_BRANCH
+
+          cp -r dist/* .
+          git add .
+          git commit -m "Release version $VERSION"
+          git push https://x-access-token:${TOKEN}@github.com/rubenszinho/gazillion-beers.git $RELEASE_BRANCH --force
+
+      - name: Tag the Release
+        env:
+          TOKEN: ${{ secrets.PAT }}
+        run: |
+          git tag -a "v$VERSION" -m "Release version $VERSION"
+          git push https://x-access-token:${TOKEN}@github.com/rubenszinho/gazillion-beers.git --tags

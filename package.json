@@ -1,7 +1,7 @@
 {
-  "name": "rubrion-frontend-template",
+  "name": "gazillion-beers",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "build": "vite build",
@@ -16,6 +16,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@semantic-release/github": "^11.0.1",
     "js-cookie": "^3.0.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

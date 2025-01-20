@@ -1,12 +1,12 @@
-name: Release Versioning
+name: Release Hotfix
 
 on:
-  push:
+  pull_request:
     branches:
-      - develop
+      - release/*
 
 jobs:
-  create-release-branch:
+  hotfix:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,22 +29,24 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Generate version and changelog
-        id: version
+      - name: Check for version bump
+        id: version-check
         run: |
-          VERSION=$(npx standard-version --dry-run | grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Generated version: $VERSION"
+          npx standard-version --dry-run --release-as patch > output.log
+          if grep -q "tagging release" output.log; then
+            echo "VERSION_BUMP=true" >> $GITHUB_ENV
+          else
+            echo "VERSION_BUMP=false" >> $GITHUB_ENV
+          fi
 
-      - name: Push to release branch
+      - name: Bump patch version
+        if: env.VERSION_BUMP == 'true'
         run: |
+          npx standard-version --release-as patch
+
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          RELEASE_BRANCH="release/v$VERSION"
 
-          npx standard-version
-
-          git checkout -b $RELEASE_BRANCH || git checkout $RELEASE_BRANCH
           git push origin HEAD --follow-tags

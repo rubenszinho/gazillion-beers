@@ -10,8 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.VERSION_BUMPER_APPID }}
+          private-key: ${{ secrets.VERSION_BUMPER_SECRET }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -25,14 +34,11 @@ jobs:
       - name: Generate version and changelog
         id: version
         run: |
-          npx standard-version --dry-run
-          VERSION=$(npx standard-version --first-release --dry-run | grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+')
+          VERSION=$(npx standard-version --dry-run | grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Generated version: $VERSION"
 
       - name: Push to release branch
-        env:
-          TOKEN: ${{ secrets.PAT }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
@@ -41,4 +47,4 @@ jobs:
           npx standard-version
 
           git checkout -b $RELEASE_BRANCH || git checkout $RELEASE_BRANCH
-          git push https://x-access-token:${TOKEN}@github.com/rubenszinho/gazillion-beers.git $RELEASE_BRANCH
+          git push origin HEAD --follow-tags

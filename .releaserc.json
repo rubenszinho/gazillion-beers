@@ -1,19 +1,32 @@
 {
   "branches": [
-    "main",
-    "develop",
+    {
+      "name": "main"
+    },
     {
       "name": "release/*",
       "prerelease": "beta"
     }
   ],
   "plugins": [
-    "@semantic-release/github",
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "dist/**",
+            "label": "Build Artifacts"
+          }
+        ]
+      }
+    ],
     [
       "@semantic-release/git",
       {
         "assets": [],
-        "message": "chore(release): ${nextRelease.version}"
+        "message": "chore(release): ${nextRelease.version} [skip ci]"
       }
     ]
   ]

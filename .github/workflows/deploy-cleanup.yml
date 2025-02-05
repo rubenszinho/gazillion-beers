@@ -1,0 +1,16 @@
+name: Cleanup Inactive Deployments
+
+on:
+  delete:
+    branches:
+      - 'release/**'
+
+jobs:
+  delete-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Cloudflare Deployment
+        run: |
+          curl -X DELETE "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/pages/projects/${{ vars.PROJECT_NAME }}/deployments/${{ github.event.ref }}" \
+          -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
+          -H "Content-Type: application/json"

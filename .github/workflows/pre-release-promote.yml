@@ -1,0 +1,43 @@
+name: Promote Release to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_branch:
+        description: 'Which release branch to promote to production? (e.g. "release/v1.1.0-beta.0")'
+        required: true
+        type: string
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.RUBRION_APP_ID }}
+          private-key: ${{ secrets.RUBRION_APP_SECRET }}
+
+      - name: Checkout Production Branch
+        run: |
+          git fetch origin
+          if ! git show-ref --verify --quiet refs/heads/main; then
+            echo "Main branch not found. Creating main branch from develop..."
+            git checkout -b main origin/develop
+            git push origin main
+          else
+            git checkout main
+          fi
+
+      - name: Set Git User Identity
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Merge Release Branch into Main
+        run: |
+          RELEASE_BRANCH="${{ github.event.inputs.release_branch }}"
+          echo "Merging $RELEASE_BRANCH into main..."
+          git merge --ff-only "$RELEASE_BRANCH"
+          git push origin main

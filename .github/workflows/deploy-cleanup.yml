@@ -22,7 +22,7 @@ jobs:
           echo "custom_domain=$CUSTOM_DOMAIN" >> $GITHUB_ENV
           echo "Extracted branch: $RAW_BRANCH"
           echo "Computed custom domain: $CUSTOM_DOMAIN"
-          
+
       - name: Fetch Deployment List from Cloudflare
         id: fetch-deployments
         run: |
@@ -41,7 +41,7 @@ jobs:
             exit 0
           fi
           echo "$DEPLOYMENT_IDS" > deployment_ids.txt
-          
+
       - name: Delete Cloudflare Deployments
         run: |
           if [[ ! -s deployment_ids.txt ]]; then
@@ -54,7 +54,7 @@ jobs:
               -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
               -H "Content-Type: application/json"
           done
-          
+
       - name: Remove Custom Domain from Cloudflare Pages
         run: |
           CUSTOM_DOMAIN="${{ env.custom_domain }}"
@@ -76,7 +76,7 @@ jobs:
           curl -X DELETE "https://api.cloudflare.com/client/v4/zones/${{ secrets.CF_ZONE_ID }}/dns_records/$RECORD_ID" \
             -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
             -H "Content-Type: application/json"
-            
+
       - name: Fetch GitHub Tag Associated with Deleted Branch
         run: |
           TAG_NAME=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
@@ -91,7 +91,6 @@ jobs:
 
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
           echo "Found GitHub Tag: $TAG_NAME"
-
 
       - name: Delete Corresponding GitHub Tag
         if: env.TAG_NAME != ''

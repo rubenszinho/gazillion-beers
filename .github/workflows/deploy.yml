@@ -1,0 +1,105 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.RUBRION_APP_ID }}
+          private-key: ${{ secrets.RUBRION_APP_SECRET }}
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Set Git User Identity
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          projectName: ${{ vars.PROJECT_NAME }}
+          directory: dist
+          branch: ${{ github.ref_name }}
+
+      - name: Configure Custom Domain for Production
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          npx release-it --ci
+
+          CUSTOM_DOMAIN="${{ vars.PROJECT_NAME }}.rubrion.com"
+          echo "Setting Cloudflare Custom Domain to: $CUSTOM_DOMAIN"
+          curl -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/pages/projects/${{ vars.PROJECT_NAME }}/domains" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
+            --data '{
+              "name": "'"$CUSTOM_DOMAIN"'"
+            }'
+
+      - name: Configure Custom Domain and Create DNS Record for Release Branch
+        if: startsWith(github.ref, 'refs/heads/release/')
+        env:
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          npx release-it --ci --preRelease=beta
+
+          BASE_VERSION=$(echo "${{ github.ref_name }}" | sed 's/^release\///' | sed 's/-beta.*//')
+          DOMAIN_SLUG="release-$(echo "$BASE_VERSION" | tr '.' '-')"
+          if [ -z "$DOMAIN_SLUG" ]; then
+            echo "No domain slug detected."
+            exit 1
+          fi
+          CUSTOM_DOMAIN="$DOMAIN_SLUG.${{ vars.PROJECT_NAME }}.rubrion.com"
+          CUSTOM_ALIAS="$DOMAIN_SLUG.${{ vars.PROJECT_NAME }}.pages.dev"
+          echo "Setting Cloudflare Custom Domain to: $CUSTOM_DOMAIN"
+          curl -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/pages/projects/${{ vars.PROJECT_NAME }}/domains" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
+            --data '{
+              "name": "'"$CUSTOM_DOMAIN"'"
+            }'
+          echo "Creating DNS record for $CUSTOM_DOMAIN..."
+          echo "Setting custom DNS: $CUSTOM_DOMAIN -> $CUSTOM_ALIAS"
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CF_ZONE_ID }}/dns_records" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
+            -d '{
+              "type": "CNAME",
+              "name": "'"$CUSTOM_DOMAIN"'",
+              "content": "'"$CUSTOM_ALIAS"'",
+              "ttl": 3600,
+              "proxied": true
+            }'
+

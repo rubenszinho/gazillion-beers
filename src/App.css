@@ -1,74 +1,163 @@
 /* src/App.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  --beer-amber: #f5bc42;
+  --beer-foam: #fff9e6;
+  --beer-dark: #a06e0a;
+  --beer-bottle: #5e3915;
+}
+
 .main-wrapper {
   width: 100vw;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #fff9e6;
+  background: linear-gradient(to bottom, var(--beer-foam), var(--beer-amber) 90%);
   position: relative;
   margin: 0;
-  padding: 0 1rem;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
 }
 
-.language-dropdown {
+.language-selector {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  font-size: 0.9rem;
-  padding: 0.3rem;
-  border-radius: 6px;
-  cursor: pointer;
+  z-index: 10;
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
   text-align: center;
-  max-width: 500px;
-  width: 100%;
-  margin: 0 auto;
+  max-width: 600px;
+  width: 90%;
+  background-color: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.app-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 15px;
+  background-color: var(--beer-foam);
+  border-radius: 16px 16px 0 0;
 }
 
 .app-title {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  color: var(--beer-dark);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+.app-title::after {
+  content: "🍺";
+  position: absolute;
+  right: -1.5rem;
+  top: 0;
 }
 
 .remaining-days {
   font-size: 1.1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.app-paragraph {
+.remaining-counter {
+  background-color: var(--beer-amber);
+  color: white;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 16px;
+  min-width: 50px;
+}
+
+.beer-count {
   font-size: 1.2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   word-wrap: break-word;
+  background-color: rgba(245, 188, 66, 0.1);
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px dashed rgba(160, 110, 10, 0.2);
 }
 
-.beer-button {
-  padding: 1rem;
-  font-size: 1rem;
-  background-color: #f0c34e;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  max-width: 300px;
-  width: 100%;
-  margin: 0 auto;
+.beer-calendar-day {
+  transition: all 0.2s ease;
 }
 
-.beer-button:hover:not(:disabled) {
-  background-color: #e2b13d;
+.beer-calendar-day:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.beer-button:active:not(:disabled) {
-  background-color: #cf9f2c;
+.beer-calendar-icon {
+  animation: bubbleFloat 2s infinite ease-in-out;
 }
 
-.beer-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+@keyframes bubbleFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.bubbles {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  pointer-events: none;
+}
+
+.bubble {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  animation: rise 8s infinite ease-in;
+}
+
+@keyframes rise {
+  0% {
+    bottom: 0;
+    opacity: 1;
+  }
+
+  100% {
+    bottom: 100%;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-container {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .app-title {
+    font-size: 1.5rem;
+  }
 }

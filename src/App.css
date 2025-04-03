@@ -14,7 +14,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(to bottom, var(--beer-foam), var(--beer-amber) 90%);
+  background: linear-gradient(
+    to bottom,
+    var(--beer-foam),
+    var(--beer-amber) 90%
+  );
   position: relative;
   margin: 0;
   padding: 0;
@@ -44,7 +48,7 @@
 }
 
 .app-container::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -63,7 +67,7 @@
 }
 
 .app-title::after {
-  content: "🍺";
+  content: '🍺';
   position: absolute;
   right: -1.5rem;
   top: 0;
@@ -112,7 +116,6 @@
 }
 
 @keyframes bubbleFloat {
-
   0%,
   100% {
     transform: translateY(0);

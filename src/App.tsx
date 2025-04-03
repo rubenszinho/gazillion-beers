@@ -217,8 +217,10 @@ export default function App() {
 
           <Box sx={{ mt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              {activeTranslation.streakDays?.replace('{count}', calculateStreak(checkInDates).toString()) ||
-                `Longest streak: ${calculateStreak(checkInDates)} days`}
+              {activeTranslation.streakDays?.replace(
+                '{count}',
+                calculateStreak(checkInDates).toString()
+              ) || `Longest streak: ${calculateStreak(checkInDates)} days`}
             </Typography>
           </Box>
         </div>

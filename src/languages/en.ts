@@ -7,4 +7,5 @@ export default {
     count === 1
       ? 'You have had 1 gazillion beer this year.'
       : `You have had ${count} gazillion beers this year.`,
+  streakDays: 'Longest beer streak: {count} days',
 };

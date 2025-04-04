@@ -95,6 +95,7 @@ export default function App() {
         if (!checkInDates.includes(todayString)) {
           setCheckInDates((prev) => [...prev, todayString]);
         }
+        setAnimateMug(false);
       }, 1500);
     }
   };

@@ -1,7 +1,10 @@
 {
   "git": {
     "commitMessage": "chore(release): ${version} [skip ci]",
-    "requireCleanWorkingDir": false
+    "tagName": "v${version}",
+    "pushArgs": ["--follow-tags", "--no-verify"],
+    "requireCleanWorkingDir": false,
+    "requireBranch": ["main", "release/*", "develop"]
   },
   "github": {
     "release": true,
@@ -14,7 +17,13 @@
   "plugins": {
     "@release-it/conventional-changelog": {
       "infile": "CHANGELOG.md",
-      "preset": "angular"
+      "preset": "angular",
+      "header": "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n"
     }
+  },
+  "hooks": {
+    "before:init": "git fetch --tags",
+    "after:bump": "npx auto-changelog -p --template keepachangelog",
+    "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
   }
 }

@@ -1,5 +1,6 @@
-import { Box, keyframes, styled, useTheme } from '@mui/material';
+import { Box, keyframes, styled, Theme, useTheme } from '@mui/material';
 import { FC } from 'react';
+
 import { beerColors } from '../theme/beerTheme';
 
 const fillBeer = keyframes`
@@ -34,7 +35,7 @@ const MugContainer = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(1),
 }));
 
-const Mug = styled(Box)(({}) => ({
+const Mug = styled(Box)(() => ({
   width: '80px',
   height: '100px',
   position: 'absolute',
@@ -49,7 +50,7 @@ const Mug = styled(Box)(({}) => ({
   overflow: 'hidden',
 }));
 
-const Handle = styled(Box)(({}) => ({
+const Handle = styled(Box)(() => ({
   width: '20px',
   height: '50px',
   position: 'absolute',
@@ -61,7 +62,7 @@ const Handle = styled(Box)(({}) => ({
 }));
 
 const Beer = styled(Box)(
-  ({ theme, filled }: { theme: any; filled: boolean }) => ({
+  ({ theme, filled }: { theme: Theme; filled: boolean }) => ({
     width: '100%',
     height: filled ? '75%' : '0%',
     position: 'absolute',

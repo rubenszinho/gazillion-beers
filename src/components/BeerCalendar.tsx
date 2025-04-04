@@ -138,7 +138,7 @@ const BeerCalendar: React.FC<BeerCalendarProps> = ({
 
           <Grid container spacing={1}>
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-              <Grid item xs={12 / 7} key={day}>
+              <Grid item xs={1} key={day} sx={{ width: 'calc(100% / 7)' }}>
                 <Box
                   sx={{
                     textAlign: 'center',
@@ -152,7 +152,7 @@ const BeerCalendar: React.FC<BeerCalendarProps> = ({
             ))}
 
             {days.map((day, index) => (
-              <Grid item xs={12 / 7} key={index}>
+              <Grid item xs={1} key={index} sx={{ width: 'calc(100% / 7)' }}>
                 <Box
                   sx={{
                     height: 40,

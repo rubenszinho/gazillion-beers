@@ -4,6 +4,12 @@
 
 Proclaim your daily gazillion beers in one click, tracked all year by a trusty cookie—no double-dips allowed!
 
+![Beer Tracking Animation](public/gazillion-beers-showcase.gif)
+
+## 🍻 Live Demo
+
+Check out the live version of the app at [gazillion-beers.rubrion.com](https://gazillion-beers.rubrion.com)
+
 ---
 
 ## How to Run Locally
@@ -36,6 +42,14 @@ To add a new language:
 2. Export a translation object containing all required keys (titles, messages, etc.).
 3. Register the file in `src/languages/index.ts`.
 4. The new language will automatically appear in the dropdown.
+
+## Features
+
+- 🍺 Track daily beer check-ins with a single click
+- 📅 Calendar view of all your beer days
+- 🔥 Streak tracking for consecutive beer days
+- 🌐 Multi-language support
+- 📱 Responsive design works on all devices
 
 ### Support the Project 🥳
 

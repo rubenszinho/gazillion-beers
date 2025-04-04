@@ -41,12 +41,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
+          LATEST_COMMIT_TYPE=$(git log -1 --pretty=%B | grep -oP '^(docs|style|test|build|ci|chore)(?:\(.*\))?:' | head -1 || echo "")
+          
+          if [[ -n "$LATEST_COMMIT_TYPE" ]]; then
+            echo "Latest commit is of type: $LATEST_COMMIT_TYPE, which doesn't require version bump."
+            echo "No new release detected."
+            exit 0
+          fi
+          
+          # Only proceed for feat, fix, refactor, perf types or if breaking change
           RELEASE_TAG=$(npx release-it --ci --dry-run --preRelease=beta --git.requireBranch=develop | grep -oP 'Release \K[0-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?' | head -n 1 | tr -d '\n' || echo "")
           
           if [ -z "$RELEASE_TAG" ]; then
             echo "No new release detected."
             exit 0
           fi
+          
           # Remove pre-release suffix for branch name
           RELEASE_BASE=$(echo "$RELEASE_TAG" | sed 's/-beta\.[0-9]\+//')
           {

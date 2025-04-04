@@ -84,7 +84,7 @@ jobs:
         run: |
           echo "Updating develop branch with main changes..."
           git fetch --all
-          
+
           # Check if develop can be fast-forwarded to main
           if git merge-base --is-ancestor develop main; then
             # Fast-forward is possible

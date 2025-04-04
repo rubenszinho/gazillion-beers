@@ -78,34 +78,46 @@ jobs:
             -H "Content-Type: application/json"
 
       - name: Fetch GitHub Tag Associated with Deleted Branch
+        id: fetch-tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Extract the exact version from the deleted branch (e.g., "release/v1.1.0-beta.0")
+          # Extract the version from the deleted branch (e.g., "release/v1.1.0")
           DELETED_BRANCH="${{ github.event.ref }}"
-          BASE_VERSION=$(echo "$DELETED_BRANCH" | sed 's/^release\///')
-
-          # Ensure the correct version format is being extracted
-          echo "Checking for tags matching: $BASE_VERSION"
-
-          # Fetch all tags and look for the exact match
-          TAG_NAME=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                          -H "Accept: application/vnd.github.v3+json" \
-                          "https://api.github.com/repos/${{ github.repository }}/tags" \
-                          | jq -r --arg VERSION "$BASE_VERSION" '.[] | select(.name==$VERSION) | .name' | head -n 1)
-
-          if [[ -z "$TAG_NAME" || "$TAG_NAME" == "null" ]]; then
-            echo "No GitHub tag found for branch: $DELETED_BRANCH"
-            exit 0
+          # Handle cases with or without "v" prefix in branch name
+          BASE_VERSION=$(echo "$DELETED_BRANCH" | sed 's/^release\/v*//')
+          
+          echo "Checking for tags matching pattern: v${BASE_VERSION}-beta"
+          
+          TAGS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                       -H "Accept: application/vnd.github.v3+json" \
+                       "https://api.github.com/repos/${{ github.repository }}/tags" \
+                       | jq -r --arg PATTERN "v${BASE_VERSION}-beta" '.[] | select(.name | startswith($PATTERN)) | .name')
+          
+          if [[ -z "$TAGS" ]]; then
+            echo "No matching beta tags found for branch: $DELETED_BRANCH"
+          else
+            echo "BETA_TAGS<<EOF" >> $GITHUB_ENV
+            echo "$TAGS" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo "Found matching beta tags: $TAGS"
           fi
 
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          echo "Found GitHub Tag: $TAG_NAME"
-
-      - name: Delete Corresponding GitHub Tag
-        if: env.TAG_NAME != ''
+      - name: Delete Corresponding GitHub Tags
+        if: env.BETA_TAGS != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Deleting GitHub Pre-Release Tag: ${{ env.TAG_NAME }}"
-          curl -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/git/refs/tags/${{ env.TAG_NAME }}"
-
-          echo "Tag ${{ env.TAG_NAME }} deleted successfully."
+          echo "Deleting GitHub Pre-Release Tags:"
+          echo "${{ env.BETA_TAGS }}"
+          
+          echo "${{ env.BETA_TAGS }}" | while read TAG_NAME; do
+            if [[ ! -z "$TAG_NAME" ]]; then
+              echo "Deleting tag: $TAG_NAME"
+              curl -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  "https://api.github.com/repos/${{ github.repository }}/git/refs/tags/$TAG_NAME"
+            fi
+          done
+          
+          echo "All beta tags deleted successfully."

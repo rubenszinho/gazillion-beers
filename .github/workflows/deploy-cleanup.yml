@@ -86,14 +86,14 @@ jobs:
           DELETED_BRANCH="${{ github.event.ref }}"
           # Handle cases with or without "v" prefix in branch name
           BASE_VERSION=$(echo "$DELETED_BRANCH" | sed 's/^release\/v*//')
-          
+
           echo "Checking for tags matching pattern: v${BASE_VERSION}-beta"
-          
+
           TAGS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                        -H "Accept: application/vnd.github.v3+json" \
                        "https://api.github.com/repos/${{ github.repository }}/tags" \
                        | jq -r --arg PATTERN "v${BASE_VERSION}-beta" '.[] | select(.name | startswith($PATTERN)) | .name')
-          
+
           if [[ -z "$TAGS" ]]; then
             echo "No matching beta tags found for branch: $DELETED_BRANCH"
           else
@@ -110,7 +110,7 @@ jobs:
         run: |
           echo "Deleting GitHub Pre-Release Tags:"
           echo "${{ env.BETA_TAGS }}"
-          
+
           echo "${{ env.BETA_TAGS }}" | while read TAG_NAME; do
             if [[ ! -z "$TAG_NAME" ]]; then
               echo "Deleting tag: $TAG_NAME"
@@ -119,5 +119,5 @@ jobs:
                   "https://api.github.com/repos/${{ github.repository }}/git/refs/tags/$TAG_NAME"
             fi
           done
-          
+
           echo "All beta tags deleted successfully."

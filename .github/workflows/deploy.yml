@@ -77,6 +77,32 @@ jobs:
             echo "Custom domain $CUSTOM_DOMAIN is already set up. Skipping creation."
           fi
 
+      - name: Merge Main Back to Develop
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          echo "Updating develop branch with main changes..."
+          git fetch --all
+          
+          # Check if develop can be fast-forwarded to main
+          if git merge-base --is-ancestor develop main; then
+            # Fast-forward is possible
+            git checkout develop
+            git merge --ff-only main
+            git push origin develop -o ci.skip
+            echo "Successfully fast-forwarded develop to match main"
+          else
+            # Need to merge - try to avoid an extra commit
+            git checkout develop
+            # Use the merge strategy that will minimize conflicts
+            git merge -s recursive -X theirs -m "[skip ci] chore: merge main back to develop" main
+            
+            # Push with ci skip flag
+            git push -o ci.skip origin develop
+            echo "Successfully updated develop with main changes"
+          fi
+
       - name: Deploy Pre-Release Artifacts to Github and Cloudflare
         if: startsWith(github.ref, 'refs/heads/release/')
         env:

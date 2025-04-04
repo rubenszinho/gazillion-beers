@@ -19,8 +19,8 @@ import { useEffect, useState } from 'react';
 import BeerCalendar from './components/BeerCalendar';
 import BeerIcon from './components/BeerIcon';
 import BeerMug from './components/BeerMug';
-import beerTheme from './theme/beerTheme';
 import translations from './languages';
+import beerTheme from './theme/beerTheme';
 
 interface BeerCountCookie {
   year: number;

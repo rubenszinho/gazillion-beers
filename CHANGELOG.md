@@ -4,21 +4,22 @@ All notable changes to this project will be documented in this file.
 
 
 
-# [1.2.0-beta.0](https://github.com/rubenszinho/gazillion-beers/compare/v1.1.0...v1.2.0-beta.0) (2025-04-04)
-
-
-### Features
-
-* Implement beer theme UI and tracking features ([#18](https://github.com/rubenszinho/gazillion-beers/issues/18)) ([8524b22](https://github.com/rubenszinho/gazillion-beers/commit/8524b225ec0c4c8922f34d754281002a6e769391))
+# [1.2.0](https://github.com/rubenszinho/gazillion-beers/compare/v1.2.0-beta.0...v1.2.0) (2025-04-04)
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v1.2.0-beta.0](https://github.com/rubenszinho/gazillion-beers/compare/v1.1.0...v1.2.0-beta.0)
+## [v1.2.0](https://github.com/rubenszinho/gazillion-beers/compare/v1.2.0-beta.0...v1.2.0)
+
+## [v1.2.0-beta.0](https://github.com/rubenszinho/gazillion-beers/compare/v1.1.0...v1.2.0-beta.0) - 2025-04-04
 
 ### Merged
 
 - Implement beer theme UI and tracking features [`#18`](https://github.com/rubenszinho/gazillion-beers/pull/18)
+
+### Commits
+
+- chore(release): 1.2.0-beta.0 [skip ci] [`3b86e57`](https://github.com/rubenszinho/gazillion-beers/commit/3b86e57e872fbaeb83b4ce68175a297483f51957)
 
 ## v1.1.0 - 2025-03-17
 

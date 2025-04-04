@@ -1,7 +1,7 @@
 {
   "name": "gazillion-beers",
   "private": true,
-  "version": "1.2.0-beta.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "build": "vite build",
